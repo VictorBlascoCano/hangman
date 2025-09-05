@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@layer base {
+	body {
+		@apply min-h-dvh flex justify-center items-center bg-black;
+	}
+
+	button {
+		@apply cursor-pointer;
+	}
+}
