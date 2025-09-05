@@ -11,6 +11,7 @@ const NewGameButton = ({
 		className="bg-blue-300 px-10 py-3 rounded-lg"
 		onClick={onClick}
 		ref={buttonRef}
+		aria-label="Click this button to start a new game"
 	>
 		New Game
 	</button>

@@ -1,8 +1,4 @@
-type GuessedLetter = {
-	id: string;
-	letter: string;
-	isGuessed: boolean;
-};
+import type { GuessedLetter } from "../types";
 
 const GuessLetters = ({
 	word,
@@ -11,7 +7,11 @@ const GuessLetters = ({
 	word: GuessedLetter[];
 	isGameLost: boolean;
 }) => (
-	<div className="flex gap-1 justify-center mt-5 mb-10">
+	<div
+		className="flex gap-1 justify-center mt-5 mb-10"
+		role="group"
+		aria-label="Word to be guessed"
+	>
 		{word.map((letterObj) => (
 			<div
 				className={`w-14 h-14 flex justify-center items-center bg-[#323232] border-b border-[#F9F4DA] text-3xl font-bold ${

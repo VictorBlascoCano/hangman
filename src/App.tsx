@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { programmingData } from "./data";
 import Confetti from "react-confetti";
 import ProgrammingBlocks from "./components/ProgrammingBlocks";
@@ -6,12 +6,7 @@ import GuessLetters from "./components/GuessLetters";
 import BoardKeys from "./components/BoardKeys";
 import FarewellBanner from "./components/FarewellBanner";
 import NewGameButton from "./components/NewGameButton";
-
-type GuessedLetter = {
-	id: string;
-	letter: string;
-	isGuessed: boolean;
-};
+import type { GuessedLetter } from "./types";
 
 const getRandom8LetterWord = async () => {
 	const placeholderWord = "abcdefgh";
@@ -69,21 +64,26 @@ function App() {
 		fetchWord();
 	}, []);
 
-	function handleKey({ letter }: { letter: string }) {
-		const isCorrectLetter = word.some(
-			(letterObj) =>
-				letterObj.letter.toUpperCase() === letter.toUpperCase()
-		);
-		setLives((prevLives) => (!isCorrectLetter ? prevLives - 1 : prevLives));
-		setKeysPressed((prevKeysPressed) => [...prevKeysPressed, letter]);
-		setWord((prevWord) =>
-			prevWord.map((letterObj) =>
-				letterObj.letter.toUpperCase() === letter.toUpperCase()
-					? { ...letterObj, isGuessed: true }
-					: letterObj
-			)
-		);
-	}
+	const handleKey = useCallback(
+		({ letter }: { letter: string }) => {
+			const isCorrectLetter = word.some(
+				(letterObj) =>
+					letterObj.letter.toUpperCase() === letter.toUpperCase()
+			);
+			setLives((prevLives) =>
+				!isCorrectLetter ? prevLives - 1 : prevLives
+			);
+			setKeysPressed((prevKeysPressed) => [...prevKeysPressed, letter]);
+			setWord((prevWord) =>
+				prevWord.map((letterObj) =>
+					letterObj.letter.toUpperCase() === letter.toUpperCase()
+						? { ...letterObj, isGuessed: true }
+						: letterObj
+				)
+			);
+		},
+		[word]
+	);
 
 	const farewell = programmingData
 		.filter((_, index) => 8 - lives > index)
@@ -95,8 +95,24 @@ function App() {
 		fetchWord();
 	}
 
+	useEffect(() => {
+		if (!isGameEnded) {
+			const handleKeyDown = (e: KeyboardEvent) => {
+				const key = e.key.toUpperCase();
+				if (/^[A-Z]$/.test(key) && !keysPressed.includes(key)) {
+					handleKey({ letter: key });
+				}
+			};
+			window.addEventListener("keydown", handleKeyDown);
+			return () => window.removeEventListener("keydown", handleKeyDown);
+		}
+	}, [isGameEnded, keysPressed, word, handleKey]);
+
 	return (
-		<main className="w-2xl bg-[#282726] flex flex-col justify-around items-center p-10 rounded-2xl gap-8 text-center">
+		<main
+			className="w-2xl bg-[#282726] flex flex-col justify-around items-center p-10 rounded-2xl gap-8 text-center"
+			aria-label="Hangman game"
+		>
 			{isGameWon && <Confetti />}
 			<h1 className="text-4xl text-[#F9F4DA]">Assembly: Endgame</h1>
 			<p className="text-2xl text-[#8E8E8E]">
